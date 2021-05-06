@@ -33,7 +33,7 @@ function Player(props: Player.PlayerProps):JSX.Element {
         player.dispose();
     }
   }, []);
-
+  console.log(classes);
   return (
     <div>
       <div data-vjs-player>
