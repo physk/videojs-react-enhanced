@@ -1,12 +1,10 @@
-import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import React, { useEffect, useRef } from 'react';
 import videojs, { VideoJsPlayer } from 'video.js';
+
 import {
-  initializeEventListeners,
-  initializePlayerComponentsDisplay,
-  filterPlugins,
-  generatePlayerOptions,
-  initializePlayer,
+  filterPlugins, generatePlayerOptions, initializeEventListeners,
+  initializePlayer, initializePlayerComponentsDisplay,
 } from './utils/index';
 
 function Player(props: Player.PlayerProps):JSX.Element {
@@ -14,7 +12,10 @@ function Player(props: Player.PlayerProps):JSX.Element {
   let player: Player.IVideoJsPlayer;
   let autoPlugins: Player.IIndexableObject | undefined;
   let manualPlugins: Array<Player.IVideoJsPlugin> = [];
-
+  let classes: Array<string> = [];
+  if(props.videojsOptions?.classNames !== undefined) {
+    classes = props.videojsOptions.classNames;
+  }
   if (props.videojsOptions?.plugins !== undefined) {
     [autoPlugins, manualPlugins] = filterPlugins(props.videojsOptions?.plugins);
   }
@@ -38,7 +39,7 @@ function Player(props: Player.PlayerProps):JSX.Element {
       <div data-vjs-player>
         <video
           ref={playerRef}
-          className={`video-js`}
+          className={`video-js ${classes.length > 0 ? classes.join(' ') : ''}`}
         />
       </div>
     </div>
@@ -65,22 +66,24 @@ namespace Player {
     src?: string;
     width?: number;
   }
-  
+
   export interface IResources {
     sources?: Array<videojs.Tech.SourceObject>;
     poster?: string;
   }
-  
+
   export interface IVideoJsOptions {
     aspectRatio?: string;
     fluid?: boolean;
     inactivityTimeout?: number;
     language?: string;
-    // liveui?: boolean;
+    liveui?: boolean;
+    fill?: boolean
     nativeControlsForTouch?: boolean;
     notSupportedMessage?: string;
     playbackRates?: Array<number>;
     plugins?: Array<IVideoJsPlugin>;
+    classNames?: Array<string>
   }
 
   export interface IVideoJsPlugin {
@@ -88,13 +91,13 @@ namespace Player {
     plugin?: (option: object) => void;
     options: object;
   }
-  
+
   export interface PlayerProps {
     playerOptions?: IPlayerOptions;
     resources?: IResources;
     videojsOptions?: IVideoJsOptions;
     hideList?: Array<string>;
-  
+
     // Custom Event Handlers
     onReady?: (player: VideoJsPlayer) => void;
     onPlay?: (event: EventTarget, player: VideoJsPlayer, currentTimeSecond: number) => void;
@@ -132,9 +135,12 @@ Player.propTypes = {
     })),
     poster: PropTypes.string,
   }),
+  className: PropTypes.arrayOf(PropTypes.string),
   videojsOptions: PropTypes.shape({
     aspectRatio: PropTypes.string,
     fluid: PropTypes.bool,
+    fill: PropTypes.bool,
+    liveui: PropTypes.bool,
     inactivityTimeout: PropTypes.number,
     language: PropTypes.string,
     nativeControlsForTouch: PropTypes.bool,
